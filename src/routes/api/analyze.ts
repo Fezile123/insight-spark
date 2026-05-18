@@ -13,18 +13,18 @@ const ResultSchema = z.object({
     z.object({
       text: z.string(),
       sentiment: z.enum(["positive", "neutral", "negative"]),
-      score: z.number().min(-1).max(1),
-      confidence: z.number().min(0).max(1),
-      emotions: z.array(z.string()).max(5),
-      keywords: z.array(z.string()).max(8),
+      score: z.number(),
+      confidence: z.number(),
+      emotions: z.array(z.string()),
+      keywords: z.array(z.string()),
       summary: z.string(),
     })
   ),
   overview: z.object({
     headline: z.string(),
-    insights: z.array(z.string()).min(2).max(6),
-    recommendations: z.array(z.string()).min(2).max(5),
-    themes: z.array(z.string()).min(1).max(8),
+    insights: z.array(z.string()),
+    recommendations: z.array(z.string()),
+    themes: z.array(z.string()),
   }),
 });
 
