@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import "@tanstack/react-start";
-import { generateText, Output } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 
@@ -47,17 +47,17 @@ export const Route = createFileRoute("/api/analyze")({
           const gateway = createLovableAiGatewayProvider(key);
           const model = gateway("google/gemini-3-flash-preview");
 
-          const { output } = await generateText({
+          const { object } = await generateObject({
             model,
             system:
               "You are an expert sentiment analysis and data insights engine. Analyze each text precisely. Score: -1 (very negative) to 1 (very positive). Confidence: 0..1. Provide actionable insights and recurring themes across the dataset.",
             prompt:
               "Analyze the following texts and produce per-item sentiment plus an overall overview.\n\n" +
               texts.map((t, i) => `[${i + 1}] ${t}`).join("\n\n"),
-            output: Output.object({ schema: ResultSchema }),
+            schema: ResultSchema,
           });
 
-          return Response.json(output);
+          return Response.json(object);
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
           const status = /402/.test(message)
