@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import "@tanstack/react-start";
-import { generateObject } from "ai";
+import { generateText } from "ai";
 import { z } from "zod";
 import { createLovableAiGatewayProvider } from "@/lib/ai-gateway";
 
@@ -47,17 +47,43 @@ export const Route = createFileRoute("/api/analyze")({
           const gateway = createLovableAiGatewayProvider(key);
           const model = gateway("google/gemini-3-flash-preview");
 
-          const { object } = await generateObject({
+          const schemaDescription = `{
+  "results": [
+    {
+      "text": string (echo the original text),
+      "sentiment": "positive" | "neutral" | "negative",
+      "score": number between -1 and 1,
+      "confidence": number between 0 and 1,
+      "emotions": string[] (up to 5),
+      "keywords": string[] (up to 8),
+      "summary": string (one sentence)
+    }
+  ],
+  "overview": {
+    "headline": string,
+    "insights": string[] (2-6 items),
+    "recommendations": string[] (2-5 items),
+    "themes": string[] (1-8 items)
+  }
+}`;
+
+          const { text } = await generateText({
             model,
             system:
-              "You are an expert sentiment analysis and data insights engine. Analyze each text precisely. Score: -1 (very negative) to 1 (very positive). Confidence: 0..1. Provide actionable insights and recurring themes across the dataset.",
+              "You are an expert sentiment analysis and data insights engine. Analyze each text precisely. Score: -1 (very negative) to 1 (very positive). Always respond with ONLY valid JSON, no markdown fences, no commentary.",
             prompt:
-              "Analyze the following texts and produce per-item sentiment plus an overall overview.\n\n" +
+              `Analyze the texts below. Return JSON exactly matching this shape:\n${schemaDescription}\n\nTexts:\n` +
               texts.map((t, i) => `[${i + 1}] ${t}`).join("\n\n"),
-            schema: ResultSchema,
           });
 
-          return Response.json(object);
+          // Strip optional code fences and parse
+          const cleaned = text
+            .trim()
+            .replace(/^```(?:json)?\s*/i, "")
+            .replace(/\s*```$/i, "");
+          const parsed = ResultSchema.parse(JSON.parse(cleaned));
+
+          return Response.json(parsed);
         } catch (err) {
           const message = err instanceof Error ? err.message : "Unknown error";
           const status = /402/.test(message)
