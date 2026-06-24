@@ -72,7 +72,7 @@ function SentimentIcon({ s }: { s: Sentiment }) {
 }
 
 export function SentimentDashboard() {
-  const [input, setInput] = useState(SAMPLE);
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<AnalysisResponse | null>(null);
 
@@ -163,46 +163,52 @@ export function SentimentDashboard() {
         className="relative overflow-hidden border-b"
         style={{ background: "var(--gradient-hero)" }}
       >
-        <div className="container mx-auto px-6 py-16 text-primary-foreground">
-          <div className="flex items-center gap-2 text-sm opacity-90">
-            <Sparkles className="h-4 w-4" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-30"
+          style={{
+            backgroundImage:
+              "radial-gradient(circle at 20% 20%, white 0, transparent 40%), radial-gradient(circle at 80% 60%, white 0, transparent 35%)",
+          }}
+        />
+        <div className="container relative mx-auto px-6 py-20 text-primary-foreground">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
+            <Sparkles className="h-3.5 w-3.5" />
             <span>AI for Data Analysis & Insights</span>
           </div>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight md:text-5xl">
-            Sentiment Analysis & Data Insights
+          <h1 className="mt-5 text-4xl font-bold tracking-tight md:text-6xl">
+            Sentiment Analysis &<br />
+            <span className="opacity-90">Data Insights</span>
           </h1>
-          <p className="mt-3 max-w-2xl text-base opacity-90 md:text-lg">
-            Paste reviews, tweets, survey responses or any text — one per line —
-            and get AI-powered sentiment scores, themes, and an actionable
-            insights report.
+          <p className="mt-4 max-w-2xl text-base opacity-90 md:text-lg">
+            Turn raw feedback into clear, AI-powered insights — sentiment scores,
+            themes, and recommendations in one click.
           </p>
         </div>
       </header>
 
-      <main className="container mx-auto space-y-8 px-6 py-10">
+      <main className="container mx-auto -mt-10 space-y-8 px-6 pb-16">
         {/* Input */}
-        <Card style={{ boxShadow: "var(--shadow-card)" }}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-primary" />
-              Input texts
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
+        <Card
+          className="border-0"
+          style={{ boxShadow: "var(--shadow-elegant)" }}
+        >
+          <CardContent className="space-y-4 pt-6">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              rows={8}
-              placeholder="One text per line. e.g. customer reviews, tweets, survey responses…"
-              className="font-mono text-sm"
+              rows={7}
+              placeholder="Paste your text here — one entry per line.&#10;e.g. customer reviews, survey responses, tweets…"
+              className="resize-none border-muted bg-background text-sm leading-relaxed focus-visible:ring-primary"
             />
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center gap-3">
               <Button
                 onClick={analyze}
                 disabled={loading}
                 size="lg"
                 style={{ background: "var(--gradient-primary)" }}
-                className="text-primary-foreground"
+                className="text-primary-foreground shadow-md transition-transform hover:scale-[1.02]"
               >
                 {loading ? (
                   <>
@@ -212,19 +218,31 @@ export function SentimentDashboard() {
                 ) : (
                   <>
                     <Sparkles className="mr-2 h-4 w-4" />
-                    Run sentiment analysis
+                    Analyze sentiment
                   </>
                 )}
               </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setInput(SAMPLE)}
+                disabled={loading}
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Try sample data
+              </Button>
+              </div>
+              <div className="flex items-center gap-3">
               {data && (
-                <Button variant="outline" onClick={downloadReport}>
+                <Button variant="outline" size="sm" onClick={downloadReport}>
                   <Download className="mr-2 h-4 w-4" />
-                  Download insights report
+                  Download report
                 </Button>
               )}
-              <span className="text-sm text-muted-foreground">
-                {input.split("\n").filter((l) => l.trim()).length} line(s)
+              <span className="rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                {input.split("\n").filter((l) => l.trim()).length} entries
               </span>
+              </div>
             </div>
           </CardContent>
         </Card>
